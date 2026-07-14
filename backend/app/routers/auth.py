@@ -14,9 +14,14 @@ from .. import models, schemas
 from ..database import get_db
 from ..auth import hash_password
 
+
+from fastapi import HTTPException, status
+from ..auth import verify_password, create_access_token
+
 router = APIRouter(prefix="/auth", tags=["auth"]) #Creates a router object. prefix="/auth" means every route we define below automatically gets /auth stuck in front of its URL (so /register becomes /auth/register)
 
 
+#register
 @router.post("/register", response_model=schemas.UserOut)
 def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     existing = db.query(models.User).filter(models.User.email == user_in.email).first()
@@ -32,3 +37,18 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit()#actually writes it to Postgres permanently
     db.refresh(user)#reloads the object from the database, so user now includes the auto-generated id that Postgres assigned
     return user#Returns the user object. FastAPI automatically converts it into UserOut shape (because of response_model=schemas.UserOut), silently dropping password_hash from the response.
+
+
+
+
+#login
+@router.post("/login")
+def login(user_in: schemas.UserLogin, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == user_in.email).first()
+    if not user or not verify_password(user_in.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    access_token = create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
