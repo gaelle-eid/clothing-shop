@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16 
+    container_name: clothing_shop_db
+    restart: always
+    environment:
+      POSTGRES_USER: shop_user
+      POSTGRES_PASSWORD: shop_pass
+      POSTGRES_DB: clothing_shop
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+
+
+  
