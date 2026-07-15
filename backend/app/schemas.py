@@ -21,3 +21,30 @@ class UserOut(BaseModel): # This schema is used for returning user data in respo
 class UserLogin(BaseModel):
     email: str
     password: str
+
+
+#for the product page
+class ProductCreate(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    size: str | None = None
+    color: str | None = None
+    category: str | None = None
+    stock: int = 0
+    image_url: str | None = None
+
+
+class ProductOut(BaseModel):
+    id: int
+    name: str
+    description: str | None
+    price: float
+    size: str | None
+    color: str | None
+    category: str | None
+    stock: int
+    image_url: str | None
+
+    class Config:
+        from_attributes = True
