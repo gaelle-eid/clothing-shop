@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import { Link } from 'react-router-dom';
 
 function Shop() {
   const [products, setProducts] = useState([]);
@@ -32,19 +33,24 @@ function Shop() {
       <div className="product-grid">
         {products.length === 0 && <p>No products available yet.</p>}
 
-        {products.map((product) => (
-          <div className="product-card" key={product.id}>
-            <img
-              src={product.image_url || 'https://via.placeholder.com/400'}
-              alt={product.name}
-              className="product-image"
-            />
-            <div className="product-info">
-              <p className="product-name">{product.name}</p>
-              <p className="product-price">€{product.price}</p>
-            </div>
-          </div>
-        ))}
+      {products.map((product) => (
+  <Link
+    to={`/products/${product.id}`}
+    className="product-card"
+    key={product.id}
+    style={{ textDecoration: 'none', color: 'inherit' }}
+  >
+    <img
+      src={product.image_url || 'https://via.placeholder.com/400'}
+      alt={product.name}
+      className="product-image"
+    />
+    <div className="product-info">
+      <p className="product-name">{product.name}</p>
+      <p className="product-price">€{product.price}</p>
+    </div>
+  </Link>
+))}
       </div>
     </div>
   );

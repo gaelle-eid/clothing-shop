@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Shop from './pages/Shop'; //add this line to import the Shop component
 import './App.css';
+import ProductDetail from './pages/ProductDetail';
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -70,6 +71,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/shop" element={<Shop />} /> {/* Add this line to route to the Shop page */}
+        <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/" element={
           <div className="home-container">
             {/* Hero Section */}
