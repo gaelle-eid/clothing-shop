@@ -747,6 +747,77 @@ html, body {
   transform: translateY(-3px);
 }
 
+/* Shop Filter Bar */
+.filter-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 0 50px 50px;
+  flex-wrap: wrap;
+}
+
+.filter-search {
+  padding: 14px 20px;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  outline: none;
+  min-width: 260px;
+  transition: border-color 0.3s;
+}
+
+.filter-search:focus {
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.filter-search::placeholder {
+  color: #bbb;
+  font-weight: 300;
+}
+
+.filter-select {
+  padding: 14px 20px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  color: #1a1a1a;
+}
+
+.filter-select:focus {
+  border-color: #1a1a1a;
+}
+
+.filter-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.filter-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+
+
 /* Responsive */
 @media (max-width: 1024px) {
   .categories-grid {

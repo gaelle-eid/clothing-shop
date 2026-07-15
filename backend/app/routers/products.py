@@ -4,12 +4,28 @@ from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
+from typing import Optional
 
 router = APIRouter(prefix="/products", tags=["products"])
 
 
+
 @router.get("/", response_model=List[schemas.ProductOut])
-def list_products(db: Session = Depends(get_db)):
+def list_products(
+    search: Optional[str] = None,
+    category: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    query = db.query(models.Product)
+
+    if search:
+        query = query.filter(models.Product.name.ilike(f"%{search}%"))
+
+    if category:
+        query = query.filter(models.Product.category == category)
+
+    return query.all()
+
     return db.query(models.Product).all()
 
 
