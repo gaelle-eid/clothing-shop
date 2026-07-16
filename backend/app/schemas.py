@@ -51,6 +51,7 @@ class ProductOut(BaseModel):
     image_url: str | None
     on_sale: bool
     created_at: datetime
+   
 
 
     class Config:
@@ -72,6 +73,23 @@ class PostOut(BaseModel):
     content: str
     image_url: str | None
     date: str | None
+
+    class Config:
+        from_attributes = True
+
+#for the contact page
+class ContactMessageCreate(BaseModel):
+    name: str
+    email: EmailStr
+    message: str
+
+
+class ContactMessageOut(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    message: str
+    created_at: datetime
 
     class Config:
         from_attributes = True

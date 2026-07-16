@@ -1,4 +1,5 @@
 
+import datetime
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func
 from .database import Base
 
@@ -27,7 +28,7 @@ class Product(Base):
     stock = Column(Integer, default=0)
     image_url = Column(String, nullable=True)
     on_sale = Column(Boolean, default=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))  # ← CHANGE THIS LINE
    
 
 
@@ -40,3 +41,12 @@ class Post(Base):
     content = Column(String, nullable=False)
     image_url = Column(String, nullable=True)
     date = Column(String, nullable=True)
+
+class ContactMessage(Base):
+    __tablename__ = "contact_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    message = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())  # ← This is fine as is

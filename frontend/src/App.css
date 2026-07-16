@@ -879,6 +879,293 @@ html, body {
   opacity: 0.6;
 }
 
+
+.page-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.page-container h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+.faq-item {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.faq-item h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.size-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.size-table th,
+.size-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.size-table th {
+  background: #f8f8f8;
+  font-weight: 600;
+}
+/* ===== Page Container ===== */
+.page-container {
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.page-container h1 {
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  color: #1a1a1a;
+  position: relative;
+}
+
+.page-container h1::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: #1a1a1a;
+  margin-top: 12px;
+}
+
+.page-container .subtitle {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 40px;
+}
+
+/* ===== Help/Info Cards ===== */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.info-card {
+  padding: 30px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.info-card .icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.info-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.info-card p {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===== FAQ ===== */
+.faq-list {
+  margin-top: 30px;
+}
+
+.faq-item {
+  padding: 20px 0;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-item .question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.faq-item .question .arrow {
+  transition: transform 0.3s ease;
+  font-size: 14px;
+}
+
+.faq-item .question .arrow.open {
+  transform: rotate(180deg);
+}
+
+.faq-item .answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  color: #555;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.faq-item .answer.open {
+  max-height: 300px;
+  padding-top: 12px;
+}
+
+/* ===== Size Guide Table ===== */
+.size-table-wrapper {
+  overflow-x: auto;
+  margin-top: 30px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+}
+
+.size-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.size-table thead {
+  background: #f5f5f5;  ;
+ 
+}
+
+.size-table th {
+  padding: 16px 20px;
+  text-align: center;
+  font-weight: 700;  /* Bold */
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #1a1a1a;  /* Black text */
+  border-bottom: 2px solid #1a1a1a;  /* Black underline */
+}
+
+.size-table td {
+  padding: 14px 20px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.size-table tbody tr:hover {
+  background: #f8f8f8;
+}
+
+.size-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.size-table tbody tr:nth-child(even):hover {
+  background: #f5f5f5;
+}
+
+/* ===== Shipping / Returns / About Cards ===== */
+.shipping-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.shipping-card {
+  padding: 30px 25px;
+  background: #fafafa;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.shipping-card:hover {
+  border-color: #1a1a1a;
+  background: #fff;
+}
+
+.shipping-card .icon {
+  font-size: 40px;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.shipping-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.shipping-card p {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===== About Pages ===== */
+.about-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  align-items: center;
+  margin: 30px 0;
+}
+
+.about-hero img {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.about-hero .content h2 {
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.about-hero .content p {
+  color: #555;
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .about-hero {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .about-hero img {
+    height: 250px;
+  }
+
+  .shipping-info {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1024px) {
   .journal-grid {
     grid-template-columns: repeat(2, 1fr);

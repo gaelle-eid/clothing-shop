@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import api from '../api/axios';
 
 function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -10,9 +13,21 @@ function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // No backend wired up yet — just simulate a confirmation for now.
-    setSent(true);
-    setForm({ name: '', email: '', message: '' });
+    setSending(true);
+    setError('');
+
+    api
+      .post('/contact/', form)
+      .then(() => {
+        setSent(true);
+        setForm({ name: '', email: '', message: '' });
+        setSending(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError('Something went wrong. Please try again.');
+        setSending(false);
+      });
   };
 
   return (
@@ -51,14 +66,17 @@ function Contact() {
             style={{ resize: 'vertical' }}
           />
 
-          <button type="submit" className="auth-btn">Send Message</button>
+          <button type="submit" className="auth-btn" disabled={sending}>
+            {sending ? 'Sending...' : 'Send Message'}
+          </button>
         </form>
 
         {sent && (
           <p className="auth-message success">
-            Thank you! Your message has been noted. (Note: not yet connected to a real backend.)
+            Thank you! Your message has been sent — we'll get back to you soon.
           </p>
         )}
+        {error && <p className="auth-message error">{error}</p>}
       </div>
     </div>
   );

@@ -10,6 +10,14 @@ import New from './pages/New';
 import Contact from './pages/Contact';
 import Journal from './pages/Journal';
 import JournalDetail from './pages/JournalDetail';
+import Shipping from './pages/Shipping';
+import Returns from './pages/Returns';
+import SizeGuide from './pages/SizeGuide';
+import FAQ from './pages/FAQ';
+import OurStory from './pages/OurStory';
+import Sustainability from './pages/Sustainability';
+import Careers from './pages/Careers';
+import Press from './pages/Press';
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -59,15 +67,8 @@ function App() {
             <div className="nav-right">
               <Link to="/login" onClick={() => setMenuOpen(false)}>Account</Link>
               <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
-              
             </div>
           </div>
-        </div>
-
-        <div className="info-banner">
-          <span>🚚 Free Shipping on orders over €200</span>
-          <span>🔄 Easy Returns within 30 days</span>
-          <span>💳 Secure Payment</span>
         </div>
       </nav>
 
@@ -81,6 +82,14 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/journal/:id" element={<JournalDetail />} />
+        <Route path="/shipping" element={<Shipping />} />
+<Route path="/returns" element={<Returns />} />
+<Route path="/size-guide" element={<SizeGuide />} />
+<Route path="/faq" element={<FAQ />} />
+<Route path="/our-story" element={<OurStory />} />
+<Route path="/sustainability" element={<Sustainability />} />
+<Route path="/careers" element={<Careers />} />
+<Route path="/press" element={<Press />} />
         <Route path="/" element={
           <div className="home-container">
             <div className="hero-section">
@@ -268,46 +277,47 @@ function App() {
         } />
       </Routes>
 
-      <footer className="footer">
-        <div className="footer-grid">
-          <div className="footer-column">
-            <h4>AMBER</h4>
-            <p>Timeless elegance for the modern woman.</p>
-            <div className="footer-social">
-              <a href="#">📷</a>
-              <a href="#">🐦</a>
-              <a href="#">📌</a>
-              <a href="#">📘</a>
-            </div>
-          </div>
-          <div className="footer-column">
-            <h4>Shop</h4>
-            <a href="#">New Arrivals</a>
-            <a href="#">Dresses</a>
-            <a href="#">Tops</a>
-            <a href="#">Bottoms</a>
-            <a href="#">Accessories</a>
-          </div>
-          <div className="footer-column">
-            <h4>Help</h4>
-            <a href="#">Shipping</a>
-            <a href="#">Returns</a>
-            <a href="#">Size Guide</a>
-            <a href="#">Contact Us</a>
-            <a href="#">FAQ</a>
-          </div>
-          <div className="footer-column">
-            <h4>About</h4>
-            <a href="#">Our Story</a>
-            <a href="#">Sustainability</a>
-            <a href="#">Careers</a>
-            <a href="#">Press</a>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>© 2026 AMBER. All rights reserved.</p>
-        </div>
-      </footer>
+<footer className="footer">
+  <div className="footer-grid">
+    <div className="footer-column">
+      <h4>AMBER</h4>
+      <p>Timeless elegance for the modern woman.</p>
+      <div className="footer-social">
+        <a href="#">📷</a>
+        <a href="#">🐦</a>
+        <a href="#">📌</a>
+        <a href="#">📘</a>
+      </div>
+    </div>
+    <div className="footer-column">
+      <h4>Shop</h4>
+      <Link to="/new">New Arrivals</Link>
+   <Link to="/shop?category=dresses">Dresses</Link>
+<Link to="/shop?category=tops">Tops</Link>
+<Link to="/shop?category=bottoms">Bottoms</Link>
+<Link to="/shop?category=accessories">Accessories</Link>
+    </div>
+    <div className="footer-column">
+      <h4>Help</h4>
+      <Link to="/contact">Contact Us</Link>
+    <Link to="/returns">Returns</Link>
+  <Link to="/size-guide">Size Guide</Link>
+  <Link to="/contact">Contact Us</Link>
+  <Link to="/faq">FAQ</Link>
+    </div>
+    <div className="footer-column">
+      <h4>About</h4>
+  <Link to="/our-story">Our Story</Link>
+  <Link to="/sustainability">Sustainability</Link>
+  <Link to="/careers">Careers</Link>
+  <Link to="/press">Press</Link>
+
+    </div>
+  </div>
+  <div className="footer-bottom">
+    <p>© 2026 AMBER. All rights reserved.</p>
+  </div>
+</footer>
 
       <button 
         className={`back-to-top ${showBackToTop ? 'visible' : ''}`}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 
 function Shop() {
@@ -8,6 +8,17 @@ function Shop() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [searchParams] = useSearchParams();
+
+  // Read category from URL on page load
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      // Capitalize first letter to match your database
+      const formattedCategory = categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1);
+      setCategory(formattedCategory);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     setLoading(true);
@@ -29,63 +40,65 @@ function Shop() {
       });
   }, [search, category]);
 
- return (
-  <div className="home-container">
-    <div className="category-section">
-      <h2 className="category-title">SHOP ALL</h2>
-    </div>
+  return (
+    <div className="home-container">
+      <div className="category-section">
+        <h2 className="category-title">
+          {category ? category : 'SHOP ALL'}
+        </h2>
+      </div>
 
-    {/* Search + Filter Bar */}
-    <div className="filter-bar">
-      <input
-        type="text"
-        placeholder="Search products..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="filter-search"
-      />
+      {/* Search + Filter Bar */}
+      <div className="filter-bar">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="filter-search"
+        />
 
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        className="filter-select"
-      >
-        <option value="">All Categories</option>
-        <option value="Dresses">Dresses</option>
-        <option value="Outerwear">Outerwear</option>
-        <option value="Accessories">Accessories</option>
-      </select>
-    </div>
-
-    {loading && <p className="filter-loading">Loading products...</p>}
-    {error && <p className="filter-loading" style={{ color: '#c0392b' }}>{error}</p>}
-
-    <div className="product-grid">
-      {!loading && products.length === 0 && (
-        <p className="filter-empty">No products match your search.</p>
-      )}
-
-      {products.map((product) => (
-        <Link
-          to={`/products/${product.id}`}
-          className="product-card"
-          key={product.id}
-          style={{ textDecoration: 'none', color: 'inherit' }}
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="filter-select"
         >
-          <img
-            src={product.image_url || 'https://via.placeholder.com/400'}
-            alt={product.name}
-            className="product-image"
-          />
-          <div className="product-info">
-            <p className="product-name">{product.name}</p>
-            <p className="product-price">€{product.price}</p>
-          </div>
-        </Link>
-      ))}
+          <option value="">All Categories</option>
+          <option value="Dresses">Dresses</option>
+          <option value="Outerwear">Outerwear</option>
+          <option value="Accessories">Accessories</option>
+        </select>
+      </div>
+
+      {loading && <p className="filter-loading">Loading products...</p>}
+      {error && <p className="filter-loading" style={{ color: '#c0392b' }}>{error}</p>}
+
+      <div className="product-grid">
+        {!loading && products.length === 0 && (
+          <p className="filter-empty">No products match your search.</p>
+        )}
+
+        {products.map((product) => (
+          <Link
+            to={`/products/${product.id}`}
+            className="product-card"
+            key={product.id}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            <img
+              src={product.image_url || 'https://via.placeholder.com/400'}
+              alt={product.name}
+              className="product-image"
+            />
+            <div className="product-info">
+              <p className="product-name">{product.name}</p>
+              <p className="product-price">€{product.price}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default Shop;
