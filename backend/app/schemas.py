@@ -52,3 +52,23 @@ class ProductOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+#for the journal page
+class PostCreate(BaseModel):
+    title: str
+    excerpt: str
+    content: str
+    image_url: str | None = None
+    date: str | None = None
+
+
+class PostOut(BaseModel):
+    id: int
+    title: str
+    excerpt: str
+    content: str
+    image_url: str | None
+    date: str | None
+
+    class Config:
+        from_attributes = True

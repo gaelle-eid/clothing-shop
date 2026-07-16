@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
-from .routers import auth, products
+from .routers import auth, products, posts
 
 # This reads every model defined in models.py (since they inherit from Base)
 # and creates the actual tables in Postgres if they don't already exist.
@@ -20,7 +20,8 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
-app.include_router(products.router) #for product table
+app.include_router(products.router)
+app.include_router(posts.router)
 
 @app.get("/")
 def root():

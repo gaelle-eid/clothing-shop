@@ -8,6 +8,8 @@ import ProductDetail from './pages/ProductDetail';
 import Sale from './pages/Sale';
 import New from './pages/New';
 import Contact from './pages/Contact';
+import Journal from './pages/Journal';
+import JournalDetail from './pages/JournalDetail';
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,11 +54,12 @@ function App() {
             <Link to="/new" onClick={() => setMenuOpen(false)}>New</Link>
             <Link to="/shop" onClick={() => setMenuOpen(false)}>Shop All</Link>
             <Link to="/sale" onClick={() => setMenuOpen(false)}>Sale</Link>
-            <a href="/">Journal</a>
+            <Link to="/journal" onClick={() => setMenuOpen(false)}>Journal</Link>
             <Link to="/contact" onClick={() => setMenuOpen(false)}>Contacts</Link>
             <div className="nav-right">
               <Link to="/login" onClick={() => setMenuOpen(false)}>Account</Link>
               <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
+              
             </div>
           </div>
         </div>
@@ -76,6 +79,8 @@ function App() {
         <Route path="/sale" element={<Sale />} />
         <Route path="/new" element={<New />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/journal" element={<Journal />} />
+        <Route path="/journal/:id" element={<JournalDetail />} />
         <Route path="/" element={
           <div className="home-container">
             <div className="hero-section">
