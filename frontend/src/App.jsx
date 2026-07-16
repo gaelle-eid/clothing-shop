@@ -2,9 +2,12 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Register from './pages/Register';
 import Login from './pages/Login';
-import Shop from './pages/Shop'; //add this line to import the Shop component
+import Shop from './pages/Shop';
 import './App.css';
 import ProductDetail from './pages/ProductDetail';
+import Sale from './pages/Sale';
+import New from './pages/New';
+import Contact from './pages/Contact';
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -35,7 +38,6 @@ function App() {
 
   return (
     <BrowserRouter>
-      {/* Navbar with Info Banner Inside */}
       <nav className="navbar">
         <div className="navbar-top">
           <h1 className="navbar-brand">AMBER</h1>
@@ -47,11 +49,11 @@ function App() {
           </button>
 
           <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
-            <a href="/">New</a>
-            <Link to="/shop">Shop All</Link>
-            <a href="/">Sale</a>
+            <Link to="/new" onClick={() => setMenuOpen(false)}>New</Link>
+            <Link to="/shop" onClick={() => setMenuOpen(false)}>Shop All</Link>
+            <Link to="/sale" onClick={() => setMenuOpen(false)}>Sale</Link>
             <a href="/">Journal</a>
-            <a href="/">Contacts</a>
+            <Link to="/contact" onClick={() => setMenuOpen(false)}>Contacts</Link>
             <div className="nav-right">
               <Link to="/login" onClick={() => setMenuOpen(false)}>Account</Link>
               <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
@@ -59,7 +61,6 @@ function App() {
           </div>
         </div>
 
-        {/* Info Banner */}
         <div className="info-banner">
           <span>🚚 Free Shipping on orders over €200</span>
           <span>🔄 Easy Returns within 30 days</span>
@@ -70,23 +71,24 @@ function App() {
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/shop" element={<Shop />} /> {/* Add this line to route to the Shop page */}
+        <Route path="/shop" element={<Shop />} />
         <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/sale" element={<Sale />} />
+        <Route path="/new" element={<New />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/" element={
           <div className="home-container">
-            {/* Hero Section */}
             <div className="hero-section">
               <h1 className="hero-title">New Arrivals</h1>
               <p className="hero-subtitle">Discover our latest collection</p>
-              <a href="/" className="hero-btn">Shop Now</a>
+              <Link to="/shop" className="hero-btn">Shop Now</Link>
             </div>
 
-            {/* 1. Featured Categories */}
             <div className="categories-grid">
               <div className="category-card">
                 <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400" alt="Dresses" />
                 <h3>Dresses</h3>
-                <a href="#">Shop Now →</a>
+                <Link to="/shop" className="category-link">Shop Now →</Link>
               </div>
               <div className="category-card">
                 <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400" alt="Tops" />
@@ -101,17 +103,15 @@ function App() {
               <div className="category-card">
                 <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400" alt="Accessories" />
                 <h3>Accessories</h3>
-                <a href="#">Shop Now →</a>
+                <Link to="/shop" className="category-link">Shop Now →</Link>
               </div>
             </div>
 
-            {/* Category Section */}
             <div className="category-section">
               <h2 className="category-title">DRESSES</h2>
-              <a href="/" className="category-link">SHOP ALL</a>
+              <Link to="/shop" className="category-link">SHOP ALL</Link>
             </div>
 
-            {/* Product Grid */}
             <div className="product-grid">
               <div className="product-card">
                 <img 
@@ -148,7 +148,6 @@ function App() {
               </div>
             </div>
 
-            {/* 3. Bestsellers */}
             <div className="bestsellers-section">
               <h2 className="section-title">Bestsellers</h2>
               <div className="product-grid" style={{ padding: '0', background: 'transparent' }}>
@@ -188,7 +187,6 @@ function App() {
               </div>
             </div>
 
-            {/* 4. About Section */}
             <div className="about-section">
               <div className="about-content">
                 <h2>Our Story</h2>
@@ -206,7 +204,6 @@ function App() {
               />
             </div>
 
-            {/* 2. Testimonials */}
             <div className="testimonials-section">
               <h2 className="section-title">What Our Customers Say</h2>
               <div className="testimonials-grid">
@@ -228,7 +225,6 @@ function App() {
               </div>
             </div>
 
-            {/* Newsletter Section */}
             <div className="newsletter-section">
               <h2 className="newsletter-title">Join the AMBER Edit</h2>
               <p className="newsletter-subtitle">
@@ -252,7 +248,6 @@ function App() {
               )}
             </div>
 
-            {/* 7. Instagram Section */}
             <div className="instagram-section">
               <h2 className="section-title">Follow us @AMBER</h2>
               <div className="instagram-grid">
@@ -268,7 +263,6 @@ function App() {
         } />
       </Routes>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="footer-grid">
           <div className="footer-column">
@@ -310,7 +304,6 @@ function App() {
         </div>
       </footer>
 
-      {/* Back to Top Button */}
       <button 
         className={`back-to-top ${showBackToTop ? 'visible' : ''}`}
         onClick={scrollToTop}

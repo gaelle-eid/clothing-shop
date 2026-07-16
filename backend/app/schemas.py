@@ -28,11 +28,13 @@ class ProductCreate(BaseModel):
     name: str
     description: str | None = None
     price: float
+    original_price: float | None = None
     size: str | None = None
     color: str | None = None
     category: str | None = None
     stock: int = 0
     image_url: str | None = None
+    on_sale: bool = False
 
 
 class ProductOut(BaseModel):
@@ -40,11 +42,13 @@ class ProductOut(BaseModel):
     name: str
     description: str | None
     price: float
+    original_price: float | None
     size: str | None
     color: str | None
     category: str | None
     stock: int
     image_url: str | None
+    on_sale: bool
 
     class Config:
         from_attributes = True

@@ -1,19 +1,18 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
-from typing import Optional
 
 router = APIRouter(prefix="/products", tags=["products"])
-
 
 
 @router.get("/", response_model=List[schemas.ProductOut])
 def list_products(
     search: Optional[str] = None,
     category: Optional[str] = None,
+    on_sale: Optional[bool] = None,
     db: Session = Depends(get_db),
 ):
     query = db.query(models.Product)
@@ -24,9 +23,10 @@ def list_products(
     if category:
         query = query.filter(models.Product.category == category)
 
-    return query.all()
+    if on_sale is not None:
+        query = query.filter(models.Product.on_sale == on_sale)
 
-    return db.query(models.Product).all()
+    return query.all()
 
 
 @router.get("/{product_id}", response_model=schemas.ProductOut)
