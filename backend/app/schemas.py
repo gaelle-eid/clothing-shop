@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 #for register
 class UserCreate(BaseModel): # This schema is used for creating a new user
@@ -49,6 +50,8 @@ class ProductOut(BaseModel):
     stock: int
     image_url: str | None
     on_sale: bool
+    created_at: datetime
+
 
     class Config:
         from_attributes = True

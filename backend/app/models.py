@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean
+
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func
 from .database import Base
 
 
@@ -26,6 +27,7 @@ class Product(Base):
     stock = Column(Integer, default=0)
     image_url = Column(String, nullable=True)
     on_sale = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
    
 
 

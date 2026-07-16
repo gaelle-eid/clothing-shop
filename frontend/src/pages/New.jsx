@@ -7,21 +7,30 @@ function New() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    api
-      .get('/products/')
-      .then((res) => {
-        // Sort newest first (highest id = most recently created)
-        const sorted = [...res.data].sort((a, b) => b.id - a.id);
-        setProducts(sorted.slice(0, 8)); // show up to 8 newest
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError('Could not load new arrivals.');
-        setLoading(false);
-      });
-  }, []);
+useEffect(() => {
+  api
+    .get('/products/')
+    .then((res) => {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const newThisMonth = res.data.filter(
+        (product) => new Date(product.created_at) >= startOfMonth
+      );
+
+      const sorted = newThisMonth.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      setProducts(sorted);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error(err);
+      setError('Could not load new arrivals.');
+      setLoading(false);
+    });
+}, []);
 
   return (
     <div className="home-container">
