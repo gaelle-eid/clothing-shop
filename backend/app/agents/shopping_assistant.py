@@ -34,6 +34,12 @@ shopping_agent = Agent(
         "person (a specific order issue, a complaint, anything you can't resolve "
         "yourself), ask for the customer's name and email, then use contact_support "
         "to send it to the team."
+
+        "For styling: if a customer asks what goes well with a product, or wants "
+        "outfit/pairing suggestions, use get_styling_candidates to see real "
+        "available options, then use your judgment to recommend 1-3 that "
+        "genuinely make sense together (consider color, occasion, and style) - "
+        "don't just list everything returned."
     ),
 )
 
@@ -184,3 +190,45 @@ def contact_support(ctx: RunContext[AgentDeps], name: str, email: str, message: 
     ctx.deps.db.add(contact_message)
     ctx.deps.db.commit()
     return "Your message has been sent to our support team. They'll get back to you by email soon."
+
+
+@shopping_agent.tool
+def get_styling_candidates(ctx: RunContext[AgentDeps], product_id: int) -> str:
+    """Get a list of other products that could be styled together with a given
+    product - use this to make outfit/pairing recommendations. Returns products
+    from OTHER categories in a similar price range, since good styling suggestions
+    usually pair different types of items (e.g. a dress with accessories), not
+    more of the same category.
+
+    Args:
+        product_id: The ID of the product the customer wants styling ideas for.
+    """
+    base_product = ctx.deps.db.query(models.Product).filter(models.Product.id == product_id).first()
+
+    if not base_product:
+        return f"No product found with id {product_id}."
+
+    # Look for products in a DIFFERENT category, within a reasonable price range
+    # of the original item - a rough proxy for "similar tier/occasion"
+    price_min = base_product.price * 0.4
+    price_max = base_product.price * 1.6
+
+    candidates = (
+        ctx.deps.db.query(models.Product)
+        .filter(
+            models.Product.id != base_product.id,
+            models.Product.category != base_product.category,
+            models.Product.price >= price_min,
+            models.Product.price <= price_max,
+        )
+        .all()
+    )
+
+    if not candidates:
+        return f"No good styling candidates found for {base_product.name}."
+
+    header = f"Styling this {base_product.category.lower()} ({base_product.name}, €{base_product.price}). Candidates from other categories:\n"
+    return header + "\n".join(
+        f"- {p.name} (id: {p.id}) — €{p.price} — {p.category}, {p.color or 'color varies'}"
+        for p in candidates
+    )
