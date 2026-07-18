@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Shop from './pages/Shop';
 import './App.css';
 import ProductDetail from './pages/ProductDetail';
+import OrderConfirmation from './pages/OrderConfirmation';
 import Sale from './pages/Sale';
 import New from './pages/New';
 import Contact from './pages/Contact';
@@ -101,6 +102,7 @@ const { cartCount } = useCart();
         <Route path="/careers" element={<Careers />} />
         <Route path="/press" element={<Press />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
         <Route path="/" element={
           <div className="home-container">
             <div className="hero-section">

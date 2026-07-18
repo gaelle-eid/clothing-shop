@@ -17,17 +17,23 @@ class AgentDeps:
 shopping_agent = Agent(
     'gateway/openai:gpt-5.2',
     deps_type=AgentDeps,
-    system_prompt=(
-        "You are a friendly shopping assistant for AMBER, an online clothing store. "
-        "Help customers find products, answer questions about items, and add things "
-        "to their cart when asked. Be concise and warm, like a helpful boutique assistant. "
-        "Always use your tools to look up real product information — never make up "
-        "product names, prices, or availability. Always confirm with the customer "
-        "before adding something to their cart, unless they explicitly asked for it. "
-        "CRITICAL: You must NEVER say something was added to the cart unless you actually "
-        "called the add_to_cart tool in this exact turn and it returned a success message. "
-        "If the customer confirms (e.g. 'yes', 'yes add 1'), you MUST call add_to_cart "
-        "before replying — do not just describe the action in words."
+   system_prompt=(
+        "You are the AMBER Assistant for an online clothing store - you help with "
+        "both shopping AND customer support. Be concise and warm, like a helpful "
+        "boutique assistant.\n\n"
+        "For shopping: help customers find products, answer questions about items, "
+        "and add things to their cart when asked. Always use your tools to look up "
+        "real product information - never make up product names, prices, or "
+        "availability. Always confirm with the customer before adding something to "
+        "their cart, unless they explicitly asked for it. "
+        "CRITICAL: You must NEVER say something was added to the cart unless you "
+        "actually called the add_to_cart tool in this exact turn and it returned a "
+        "success message.\n\n"
+        "For support: answer questions about shipping, returns, and sizing using "
+        "your tools - never guess at policy details. If a question needs a real "
+        "person (a specific order issue, a complaint, anything you can't resolve "
+        "yourself), ask for the customer's name and email, then use contact_support "
+        "to send it to the team."
     ),
 )
 
@@ -101,7 +107,7 @@ def add_to_cart(ctx: RunContext[AgentDeps], product_id: int, quantity: int = 1) 
     print(f"🔧 TOOL CALLED: add_to_cart(product_id={product_id}, quantity={quantity})")  # debug line
 
     product = ctx.deps.db.query(models.Product).filter(models.Product.id == product_id).first()
-    ...
+    
 
     if not product:
         return f"No product found with id {product_id}, could not add to cart."
@@ -128,3 +134,53 @@ def add_to_cart(ctx: RunContext[AgentDeps], product_id: int, quantity: int = 1) 
     ctx.deps.db.commit()
 
     return f"Added {quantity} x {product.name} to the cart."
+
+
+@shopping_agent.tool
+def get_shipping_info(ctx: RunContext[AgentDeps]) -> str:
+    """Get information about shipping options, costs, and delivery times."""
+    return (
+        "Shipping info: Free standard shipping on orders over €200. "
+        "Orders under €200 have a flat €10 shipping fee. "
+        "Standard delivery takes 3-5 business days within the EU. "
+        "We currently ship within the EU only."
+    )
+
+
+@shopping_agent.tool
+def get_return_policy(ctx: RunContext[AgentDeps]) -> str:
+    """Get information about returns and refunds."""
+    return (
+        "Return policy: Items can be returned within 30 days of delivery, "
+        "as long as they're unworn, unwashed, and have original tags attached. "
+        "Refunds are issued to the original payment method within 5-7 business "
+        "days of us receiving the return."
+    )
+
+
+@shopping_agent.tool
+def get_size_guide(ctx: RunContext[AgentDeps]) -> str:
+    """Get general sizing guidance for AMBER clothing."""
+    return (
+        "Size guide: AMBER sizes run true to standard EU sizing (XS-XL). "
+        "If you're between sizes, we generally recommend sizing up for a "
+        "more relaxed fit, or sizing down for a more fitted look. "
+        "Check each product's individual description for fit notes."
+    )
+
+
+@shopping_agent.tool
+def contact_support(ctx: RunContext[AgentDeps], name: str, email: str, message: str) -> str:
+    """Submit a message to human customer support for issues you can't resolve
+    yourself - e.g. a specific order problem, a complaint, or anything requiring
+    a real person to look into.
+
+    Args:
+        name: The customer's name.
+        email: The customer's email, so support can respond.
+        message: A clear summary of the issue or question.
+    """
+    contact_message = models.ContactMessage(name=name, email=email, message=message)
+    ctx.deps.db.add(contact_message)
+    ctx.deps.db.commit()
+    return "Your message has been sent to our support team. They'll get back to you by email soon."

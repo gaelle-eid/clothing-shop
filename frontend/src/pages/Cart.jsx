@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);  // real cart rows from the backend, each with a nested product
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [checkingOut, setCheckingOut] = useState(false); // true while checkout request is in flight
+  const navigate = useNavigate();
 
   // Fetch the real cart from the backend
   const fetchCart = () => {
@@ -69,6 +71,26 @@ function Cart() {
       .catch((err) => {
         console.error(err);
         setError('Could not clear cart.');
+      });
+  };
+
+  // Checkout - calls the real backend, which validates stock, creates the
+  // order, decrements stock, and clears the cart, all in one atomic step.
+  const handleCheckout = () => {
+    setCheckingOut(true);
+    api
+      .post('/orders/checkout')
+      .then((res) => {
+        // Success - navigate to a confirmation page showing the new order
+        navigate(`/order-confirmation/${res.data.id}`);
+      })
+      .catch((err) => {
+        console.error(err);
+        // The backend sends a clear message (e.g. "not enough stock for X")
+        // in err.response.data.detail - show that directly if it exists
+        const detail = err?.response?.data?.detail;
+        setError(detail || 'Checkout failed. Please try again.');
+        setCheckingOut(false);
       });
   };
 
@@ -149,7 +171,9 @@ function Cart() {
             <span>Total</span>
             <span>€{(cartTotal >= 200 ? cartTotal : cartTotal + 10).toFixed(2)}</span>
           </div>
-          <button className="checkout-btn">Proceed to Checkout</button>
+          <button className="checkout-btn" onClick={handleCheckout} disabled={checkingOut}>
+            {checkingOut ? 'Processing...' : 'Proceed to Checkout'}
+          </button>
           <button className="clear-cart-btn" onClick={clearCart}>
             Clear Cart
           </button>
