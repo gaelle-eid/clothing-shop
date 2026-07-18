@@ -1,84 +1,63 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import api from '../api/axios';
 
+// This context's job used to be storing the cart in localStorage.
+// Now it just tracks ONE thing: how many items are in the REAL
+// backend cart, so the navbar badge (🛒) can show the correct number.
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState([]);
-  const [cartTotal, setCartTotal] = useState(0);
+  const [cartCount, setCartCount] = useState(0); // total quantity across all cart items
 
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
+  // Ask the backend "what's really in my cart?" and add up the quantities.
+  // useCallback just means this function doesn't get recreated on every
+  // render - a small performance detail, not critical to understand deeply.
+  const refreshCartCount = useCallback(() => {
+    api
+      .get('/cart/') // the REAL cart endpoint - same one the AI agent's add_to_cart tool uses
+      .then((res) => {
+        // res.data is an array of cart items, each with a quantity.
+        // reduce() adds up all the quantities into one total number.
+        const total = res.data.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(total);
+      })
+      .catch(() => {
+        // If the user isn't logged in yet (401 error) or something else
+        // goes wrong, just show 0 instead of crashing the whole navbar.
+        setCartCount(0);
+      });
   }, []);
 
+  // As soon as the app loads, check what's really in the cart.
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-    calculateTotal();
-  }, [cartItems]);
+    refreshCartCount();
+  }, [refreshCartCount]);
 
-  const calculateTotal = () => {
-    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    setCartTotal(total);
+  // Add a product to the REAL backend cart.
+  // productId = which product, quantity = how many.
+  // Returns the request itself (a "promise") so whichever button called
+  // this can react afterward - e.g. show "Added!" or a login prompt.
+  const addToCart = (productId, quantity = 1) => {
+    return api
+      .post('/cart/', { product_id: productId, quantity })
+      .then((res) => {
+        refreshCartCount(); // update the badge immediately after adding
+        return res;
+      });
   };
 
-  const addToCart = (product, quantity = 1) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      } else {
-        return [...prevItems, { ...product, quantity }];
-      }
-    });
-  };
-
-  const removeFromCart = (productId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
-  };
-
-  const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  const clearCart = () => {
-    setCartItems([]);
-  };
-
-  const getCartCount = () => {
-    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  };
-
+  // Make cartCount, refreshCartCount, and addToCart available to
+  // ANY component in the app that calls useCart() (see below).
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        cartTotal,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        getCartCount,
-      }}
-    >
+    <CartContext.Provider value={{ cartCount, refreshCartCount, addToCart }}>
       {children}
     </CartContext.Provider>
   );
 }
 
+// A small helper so other files can just write:
+//   const { cartCount, addToCart } = useCart();
+// instead of dealing with useContext(CartContext) directly everywhere.
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {

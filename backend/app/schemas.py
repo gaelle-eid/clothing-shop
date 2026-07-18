@@ -112,3 +112,25 @@ class CartItemOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+#for checkout/orders
+class OrderItemOut(BaseModel):
+    id: int
+    product_id: int
+    product_name: str  # snapshot taken at checkout time, not the live product name
+    price: float        # snapshot price, not the live product price
+    quantity: int
+
+    class Config:
+        from_attributes = True
+
+
+class OrderOut(BaseModel):
+    id: int
+    total: float
+    status: str
+    created_at: datetime
+    items: list[OrderItemOut]  # nested - each order includes its full list of items
+
+    class Config:
+        from_attributes = True

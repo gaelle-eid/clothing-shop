@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
-from .routers import auth, products, posts, contact, cart
+from .routers import auth, products, posts, contact, cart,agent 
 # This reads every model defined in models.py (since they inherit from Base)
 # and creates the actual tables in Postgres if they don't already exist.
 models.Base.metadata.create_all(bind=engine)
@@ -23,6 +23,7 @@ app.include_router(products.router)
 app.include_router(posts.router)
 app.include_router(contact.router)
 app.include_router(cart.router)
+app.include_router(agent.router)
 
 
 @app.get("/")

@@ -20,9 +20,12 @@ import Careers from './pages/Careers';
 import Press from './pages/Press';
 import Cart from './pages/Cart';
 import { useCart } from './context/CartContext';
+import ChatWidget from './components/ChatWidget';
 
 function App() {
-  const { getCartCount } = useCart();
+  // cartCount now comes straight from the real backend cart (via CartContext),
+// not from localStorage - this is the number shown in the 🛒 badge
+const { cartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [newsletterMsg, setNewsletterMsg] = useState('');
@@ -72,7 +75,7 @@ function App() {
               <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
               <Link to="/cart" className="cart-link" onClick={() => setMenuOpen(false)}>
                 🛒
-                {getCartCount() > 0 && <span className="cart-badge">{getCartCount()}</span>}
+                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
               </Link>
             </div>
           </div>
@@ -320,12 +323,14 @@ function App() {
         </div>
       </footer>
 
-      <button 
+     <button 
         className={`back-to-top ${showBackToTop ? 'visible' : ''}`}
         onClick={scrollToTop}
       >
         ↑
       </button>
+
+      <ChatWidget />
     </BrowserRouter>
   );
 }

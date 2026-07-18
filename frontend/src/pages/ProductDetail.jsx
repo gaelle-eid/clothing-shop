@@ -26,11 +26,24 @@ function ProductDetail() {
       });
   }, [id]);
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 3000);
-  };
+const handleAddToCart = () => {
+  // addToCart now takes just the product's ID (not the whole object),
+  // and it's a real network request to the backend - so we wait for it
+  // to succeed before showing the "Added to cart!" confirmation.
+  addToCart(product.id, quantity)
+    .then(() => {
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 3000);
+    })
+    .catch((err) => {
+      console.error(err);
+      // 401 means "not logged in" - the backend requires authentication
+      // for cart actions, so show a clear message instead of failing silently
+      if (err?.response?.status === 401) {
+        setError('Please log in to add items to your cart.');
+      }
+    });
+};
 
   if (loading) return <p style={{ padding: '60px', textAlign: 'center' }}>Loading...</p>;
   if (error) return <p style={{ padding: '60px', textAlign: 'center', color: 'red' }}>{error}</p>;

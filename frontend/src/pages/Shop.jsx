@@ -96,8 +96,18 @@ function Shop() {
               </div>
             </Link>
             <button
-              className="quick-add-btn"
-              onClick={() => addToCart(product, 1)}
+           className="quick-add-btn"
+  onClick={() =>
+    // addToCart now takes just the product's ID and returns a real
+    // network request - .catch() handles the case where the user
+    // isn't logged in yet (the backend rejects the request with a 401)
+    addToCart(product.id, 1).catch((err) => {
+      console.error(err);
+      if (err?.response?.status === 401) {
+        alert('Please log in to add items to your cart.');
+      }
+    })
+  }
               style={{
                 margin: '0 16px 16px 16px',
                 padding: '8px',

@@ -7,4 +7,16 @@ const api = axios.create({
   },
 });
 
+// Before every request, check if we have a saved login token,
+// and if so, attach it automatically as an Authorization header.
+// This means individual components (like the chat widget) never
+// need to manually handle tokens themselves.
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export default api;

@@ -1,9 +1,6 @@
-
-import datetime
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func
-from .database import Base
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship
+from .database import Base
 
 
 class User(Base):
@@ -30,8 +27,10 @@ class Product(Base):
     stock = Column(Integer, default=0)
     image_url = Column(String, nullable=True)
     on_sale = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))  # ← CHANGE THIS LINE
-   
+    # server_default=func.now() means POSTGRES fills this in fresh, per row, at insert time.
+    # default=datetime.now() (the old version) only runs ONCE, when the server starts -
+    # every product would get the same frozen timestamp, breaking New Arrivals sorting.
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 class Post(Base):
@@ -44,6 +43,7 @@ class Post(Base):
     image_url = Column(String, nullable=True)
     date = Column(String, nullable=True)
 
+
 class ContactMessage(Base):
     __tablename__ = "contact_messages"
 
@@ -51,10 +51,10 @@ class ContactMessage(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=False)
     message = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())  # ← This is fine as is
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
-#fpr cart task
+#for cart task
 class CartItem(Base):
     __tablename__ = "cart_items"
 
@@ -64,4 +64,39 @@ class CartItem(Base):
     quantity = Column(Integer, nullable=False, default=1)
 
     user = relationship("User")
+    product = relationship("Product")
+
+
+#for checkout/orders
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    total = Column(Float, nullable=False)
+    # Simple status field - no real payment processing here, so every order
+    # starts as "pending". Could later be updated by an admin (e.g. "shipped").
+    status = Column(String, default="pending")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
+    # One Order has MANY OrderItems. "items" lets us write order.items to get them all.
+    items = relationship("OrderItem", back_populates="order")
+
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+
+    # These three fields are a SNAPSHOT taken at checkout time - copied from
+    # the Product as it existed THEN. If the product's real price changes
+    # later, this past order's record stays accurate to what was actually paid.
+    product_name = Column(String, nullable=False)
+    price = Column(Float, nullable=False)
+    quantity = Column(Integer, nullable=False)
+
+    order = relationship("Order", back_populates="items")
     product = relationship("Product")

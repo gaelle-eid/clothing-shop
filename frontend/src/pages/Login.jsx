@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import '../App.css';
 
 function Login() {
@@ -9,12 +10,13 @@ function Login() {
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
+  const { refreshCartCount } = useCart(); // so the badge switches to THIS user's real cart right away
+const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', response.data.access_token);
+      refreshCartCount(); // now that we're logged in as this user, load THEIR real cart count
       setMessage('Welcome back.');
       setIsSuccess(true);
       setTimeout(() => navigate('/'), 1500);
