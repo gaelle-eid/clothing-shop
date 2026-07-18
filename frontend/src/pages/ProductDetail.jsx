@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import api from '../api/axios';
+import { useCart } from '../context/CartContext';
 
 function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     api
@@ -21,6 +25,12 @@ function ProductDetail() {
         setLoading(false);
       });
   }, [id]);
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 3000);
+  };
 
   if (loading) return <p style={{ padding: '60px', textAlign: 'center' }}>Loading...</p>;
   if (error) return <p style={{ padding: '60px', textAlign: 'center', color: 'red' }}>{error}</p>;
@@ -47,9 +57,64 @@ function ProductDetail() {
         {product.category && <p><strong>Category:</strong> {product.category}</p>}
         <p><strong>In stock:</strong> {product.stock}</p>
 
-        <button className="about-btn" style={{ marginTop: '25px' }}>
-          Add to Cart
+        {/* Quantity Selector */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
+          <label style={{ fontWeight: '500' }}>Quantity:</label>
+          <button
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            disabled={quantity <= 1}
+            style={{
+              width: '36px',
+              height: '36px',
+              border: '1px solid #ddd',
+              background: '#fff',
+              cursor: 'pointer',
+              fontSize: '18px',
+              borderRadius: '4px'
+            }}
+          >
+            -
+          </button>
+          <span style={{ fontSize: '18px', minWidth: '30px', textAlign: 'center' }}>{quantity}</span>
+          <button
+            onClick={() => setQuantity(quantity + 1)}
+            disabled={product.stock && quantity >= product.stock}
+            style={{
+              width: '36px',
+              height: '36px',
+              border: '1px solid #ddd',
+              background: '#fff',
+              cursor: 'pointer',
+              fontSize: '18px',
+              borderRadius: '4px'
+            }}
+          >
+            +
+          </button>
+        </div>
+
+        <button
+          className="about-btn"
+          onClick={handleAddToCart}
+          disabled={product.stock === 0}
+          style={{
+            marginTop: '25px',
+            opacity: product.stock === 0 ? '0.5' : '1',
+            cursor: product.stock === 0 ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {product.stock === 0 ? 'Out of Stock' : 'Add to Cart 🛒'}
         </button>
+
+        {addedToCart && (
+          <p style={{ color: '#4a7c59', marginTop: '12px', fontWeight: '500' }}>
+            ✅ Added to cart!
+          </p>
+        )}
+
+        <Link to="/shop" style={{ display: 'inline-block', marginTop: '20px', color: '#666' }}>
+          ← Back to Shop
+        </Link>
       </div>
     </div>
   );

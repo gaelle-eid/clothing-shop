@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
+import { useCart } from '../context/CartContext';
 
 function Shop() {
   const [products, setProducts] = useState([]);
@@ -9,12 +10,12 @@ function Shop() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [searchParams] = useSearchParams();
+  const { addToCart } = useCart();
 
   // Read category from URL on page load
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     if (categoryParam) {
-      // Capitalize first letter to match your database
       const formattedCategory = categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1);
       setCategory(formattedCategory);
     }
@@ -79,22 +80,39 @@ function Shop() {
         )}
 
         {products.map((product) => (
-          <Link
-            to={`/products/${product.id}`}
-            className="product-card"
-            key={product.id}
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
-            <img
-              src={product.image_url || 'https://via.placeholder.com/400'}
-              alt={product.name}
-              className="product-image"
-            />
-            <div className="product-info">
-              <p className="product-name">{product.name}</p>
-              <p className="product-price">€{product.price}</p>
-            </div>
-          </Link>
+          <div className="product-card" key={product.id}>
+            <Link
+              to={`/products/${product.id}`}
+              style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+            >
+              <img
+                src={product.image_url || 'https://via.placeholder.com/400'}
+                alt={product.name}
+                className="product-image"
+              />
+              <div className="product-info">
+                <p className="product-name">{product.name}</p>
+                <p className="product-price">€{product.price}</p>
+              </div>
+            </Link>
+            <button
+              className="quick-add-btn"
+              onClick={() => addToCart(product, 1)}
+              style={{
+                margin: '0 16px 16px 16px',
+                padding: '8px',
+                width: 'calc(100% - 32px)',
+                background: '#1a1a1a',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}
+            >
+              Add to Cart 🛒
+            </button>
+          </div>
         ))}
       </div>
     </div>

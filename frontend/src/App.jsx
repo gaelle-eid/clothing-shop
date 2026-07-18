@@ -18,8 +18,11 @@ import OurStory from './pages/OurStory';
 import Sustainability from './pages/Sustainability';
 import Careers from './pages/Careers';
 import Press from './pages/Press';
+import Cart from './pages/Cart';
+import { useCart } from './context/CartContext';
 
 function App() {
+  const { getCartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [newsletterMsg, setNewsletterMsg] = useState('');
@@ -67,6 +70,10 @@ function App() {
             <div className="nav-right">
               <Link to="/login" onClick={() => setMenuOpen(false)}>Account</Link>
               <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
+              <Link to="/cart" className="cart-link" onClick={() => setMenuOpen(false)}>
+                🛒
+                {getCartCount() > 0 && <span className="cart-badge">{getCartCount()}</span>}
+              </Link>
             </div>
           </div>
         </div>
@@ -83,13 +90,14 @@ function App() {
         <Route path="/journal" element={<Journal />} />
         <Route path="/journal/:id" element={<JournalDetail />} />
         <Route path="/shipping" element={<Shipping />} />
-<Route path="/returns" element={<Returns />} />
-<Route path="/size-guide" element={<SizeGuide />} />
-<Route path="/faq" element={<FAQ />} />
-<Route path="/our-story" element={<OurStory />} />
-<Route path="/sustainability" element={<Sustainability />} />
-<Route path="/careers" element={<Careers />} />
-<Route path="/press" element={<Press />} />
+        <Route path="/returns" element={<Returns />} />
+        <Route path="/size-guide" element={<SizeGuide />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/our-story" element={<OurStory />} />
+        <Route path="/sustainability" element={<Sustainability />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/press" element={<Press />} />
+        <Route path="/cart" element={<Cart />} />
         <Route path="/" element={
           <div className="home-container">
             <div className="hero-section">
@@ -102,28 +110,23 @@ function App() {
               <div className="category-card">
                 <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400" alt="Dresses" />
                 <h3>Dresses</h3>
-                <Link to="/shop" className="category-link">Shop Now →</Link>
+                <Link to="/shop?category=Dresses" className="category-link">Shop Now →</Link>
               </div>
               <div className="category-card">
-                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400" alt="Tops" />
-                <h3>Tops</h3>
-                <a href="#">Shop Now →</a>
-              </div>
-              <div className="category-card">
-                <img src="https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=400" alt="Bottoms" />
-                <h3>Bottoms</h3>
-                <a href="#">Shop Now →</a>
+                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400" alt="Outerwear" />
+                <h3>Outerwear</h3>
+                <Link to="/shop?category=Outerwear" className="category-link">Shop Now →</Link>
               </div>
               <div className="category-card">
                 <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400" alt="Accessories" />
                 <h3>Accessories</h3>
-                <Link to="/shop" className="category-link">Shop Now →</Link>
+                <Link to="/shop?category=Accessories" className="category-link">Shop Now →</Link>
               </div>
             </div>
 
             <div className="category-section">
               <h2 className="category-title">DRESSES</h2>
-              <Link to="/shop" className="category-link">SHOP ALL</Link>
+              <Link to="/shop?category=Dresses" className="category-link">SHOP ALL</Link>
             </div>
 
             <div className="product-grid">
@@ -277,47 +280,45 @@ function App() {
         } />
       </Routes>
 
-<footer className="footer">
-  <div className="footer-grid">
-    <div className="footer-column">
-      <h4>AMBER</h4>
-      <p>Timeless elegance for the modern woman.</p>
-      <div className="footer-social">
-        <a href="#">📷</a>
-        <a href="#">🐦</a>
-        <a href="#">📌</a>
-        <a href="#">📘</a>
-      </div>
-    </div>
-    <div className="footer-column">
-      <h4>Shop</h4>
-      <Link to="/new">New Arrivals</Link>
-   <Link to="/shop?category=dresses">Dresses</Link>
-<Link to="/shop?category=tops">Tops</Link>
-<Link to="/shop?category=bottoms">Bottoms</Link>
-<Link to="/shop?category=accessories">Accessories</Link>
-    </div>
-    <div className="footer-column">
-      <h4>Help</h4>
-      <Link to="/contact">Contact Us</Link>
-    <Link to="/returns">Returns</Link>
-  <Link to="/size-guide">Size Guide</Link>
-  <Link to="/contact">Contact Us</Link>
-  <Link to="/faq">FAQ</Link>
-    </div>
-    <div className="footer-column">
-      <h4>About</h4>
-  <Link to="/our-story">Our Story</Link>
-  <Link to="/sustainability">Sustainability</Link>
-  <Link to="/careers">Careers</Link>
-  <Link to="/press">Press</Link>
-
-    </div>
-  </div>
-  <div className="footer-bottom">
-    <p>© 2026 AMBER. All rights reserved.</p>
-  </div>
-</footer>
+      <footer className="footer">
+        <div className="footer-grid">
+          <div className="footer-column">
+            <h4>AMBER</h4>
+            <p>Timeless elegance for the modern woman.</p>
+            <div className="footer-social">
+              <a href="#">📷</a>
+              <a href="#">🐦</a>
+              <a href="#">📌</a>
+              <a href="#">📘</a>
+            </div>
+          </div>
+          <div className="footer-column">
+            <h4>Shop</h4>
+            <Link to="/new">New Arrivals</Link>
+            <Link to="/shop?category=Dresses">Dresses</Link>
+            <Link to="/shop?category=Outerwear">Outerwear</Link>
+            <Link to="/shop?category=Accessories">Accessories</Link>
+          </div>
+          <div className="footer-column">
+            <h4>Help</h4>
+            <Link to="/shipping">Shipping</Link>
+            <Link to="/returns">Returns</Link>
+            <Link to="/size-guide">Size Guide</Link>
+            <Link to="/contact">Contact Us</Link>
+            <Link to="/faq">FAQ</Link>
+          </div>
+          <div className="footer-column">
+            <h4>About</h4>
+            <Link to="/our-story">Our Story</Link>
+            <Link to="/sustainability">Sustainability</Link>
+            <Link to="/careers">Careers</Link>
+            <Link to="/press">Press</Link>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>© 2026 AMBER. All rights reserved.</p>
+        </div>
+      </footer>
 
       <button 
         className={`back-to-top ${showBackToTop ? 'visible' : ''}`}

@@ -2,6 +2,8 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func
 from .database import Base
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -50,3 +52,16 @@ class ContactMessage(Base):
     email = Column(String, nullable=False)
     message = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())  # ← This is fine as is
+
+
+#fpr cart task
+class CartItem(Base):
+    __tablename__ = "cart_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Integer, nullable=False, default=1)
+
+    user = relationship("User")
+    product = relationship("Product")

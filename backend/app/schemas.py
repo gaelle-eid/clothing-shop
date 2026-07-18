@@ -93,3 +93,22 @@ class ContactMessageOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+#for the cart
+class CartItemCreate(BaseModel):
+    product_id: int
+    quantity: int = 1
+
+
+class CartItemUpdate(BaseModel):
+    quantity: int
+
+
+class CartItemOut(BaseModel):
+    id: int
+    product: ProductOut
+    quantity: int
+
+    class Config:
+        from_attributes = True
