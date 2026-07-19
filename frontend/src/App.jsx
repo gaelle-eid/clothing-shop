@@ -22,11 +22,12 @@ import Press from './pages/Press';
 import Cart from './pages/Cart';
 import { useCart } from './context/CartContext';
 import ChatWidget from './components/ChatWidget';
+import OrderHistory from './pages/OrderHistory';
 
 function App() {
   // cartCount now comes straight from the real backend cart (via CartContext),
-// not from localStorage - this is the number shown in the 🛒 badge
-const { cartCount } = useCart();
+  // not from localStorage - this is the number shown in the 🛒 badge
+  const { cartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [newsletterMsg, setNewsletterMsg] = useState('');
@@ -73,6 +74,7 @@ const { cartCount } = useCart();
             <Link to="/contact" onClick={() => setMenuOpen(false)}>Contacts</Link>
             <div className="nav-right">
               <Link to="/login" onClick={() => setMenuOpen(false)}>Account</Link>
+              <Link to="/orders" onClick={() => setMenuOpen(false)}>My Orders</Link>
               <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
               <Link to="/cart" className="cart-link" onClick={() => setMenuOpen(false)}>
                 🛒
@@ -102,6 +104,7 @@ const { cartCount } = useCart();
         <Route path="/careers" element={<Careers />} />
         <Route path="/press" element={<Press />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/orders" element={<OrderHistory />} />
         <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
         <Route path="/" element={
           <div className="home-container">
@@ -325,7 +328,7 @@ const { cartCount } = useCart();
         </div>
       </footer>
 
-     <button 
+      <button 
         className={`back-to-top ${showBackToTop ? 'visible' : ''}`}
         onClick={scrollToTop}
       >
