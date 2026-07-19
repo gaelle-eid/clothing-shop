@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useCart } from '../context/CartContext';
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);  // real cart rows from the backend, each with a nested product
@@ -8,6 +9,7 @@ function Cart() {
   const [error, setError] = useState('');
   const [checkingOut, setCheckingOut] = useState(false); // true while checkout request is in flight
   const navigate = useNavigate();
+  const { refreshCartCount } = useCart(); // keeps the navbar badge in sync with real cart changes
 
   // Fetch the real cart from the backend
   const fetchCart = () => {
@@ -46,7 +48,10 @@ function Cart() {
     }
     api
       .put(`/cart/${itemId}`, { quantity: newQuantity })
-      .then(() => fetchCart())  // re-fetch so the UI reflects the real, saved state
+      .then(() => {
+        fetchCart();          // re-fetch so the page reflects the real, saved state
+        refreshCartCount();   // and refresh the navbar badge too
+      })
       .catch((err) => {
         console.error(err);
         setError('Could not update quantity.');
@@ -57,7 +62,10 @@ function Cart() {
   const removeFromCart = (itemId) => {
     api
       .delete(`/cart/${itemId}`)
-      .then(() => fetchCart())
+      .then(() => {
+        fetchCart();
+        refreshCartCount();
+      })
       .catch((err) => {
         console.error(err);
         setError('Could not remove item.');
@@ -67,7 +75,10 @@ function Cart() {
   // "Clear cart" - no single backend endpoint for this, so remove each item one by one
   const clearCart = () => {
     Promise.all(cartItems.map((item) => api.delete(`/cart/${item.id}`)))
-      .then(() => fetchCart())
+      .then(() => {
+        fetchCart();
+        refreshCartCount();
+      })
       .catch((err) => {
         console.error(err);
         setError('Could not clear cart.');
@@ -81,6 +92,7 @@ function Cart() {
     api
       .post('/orders/checkout')
       .then((res) => {
+        refreshCartCount(); // checkout clears the cart on the backend - sync the badge
         // Success - navigate to a confirmation page showing the new order
         navigate(`/order-confirmation/${res.data.id}`);
       })
