@@ -53,57 +53,40 @@ function OrderHistory() {
   }
 
   return (
-    <div className="cart-container">
+    <div className="orders-page">
       <h1>Order History</h1>
 
       {orders.map((order) => (
-        <div
-          key={order.id}
-          className="cart-items"
-          style={{ marginBottom: '25px', padding: '20px', border: '1px solid #eee' }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '15px',
-              paddingBottom: '10px',
-              borderBottom: '1px solid #eee',
-            }}
-          >
-            <div>
-              <strong>Order #{order.id}</strong>
-              <span style={{ marginLeft: '12px', color: '#999', fontSize: '13px' }}>
-                {new Date(order.created_at).toLocaleDateString()}
+        <div className="order-card" key={order.id}>
+          <div className="order-card-header">
+            <div className="order-card-header-left">
+              <span className="order-id">Order #{order.id}</span>
+              <span className="order-date">
+                {new Date(order.created_at).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
               </span>
             </div>
-            <span style={{ textTransform: 'capitalize', fontSize: '13px', color: '#666' }}>
-              {order.status}
-            </span>
+            <span className={`order-status ${order.status}`}>{order.status}</span>
           </div>
 
-          {order.items.map((item) => (
-            <div className="cart-item" key={item.id}>
-              <div className="cart-item-details">
-                <h3>{item.product_name}</h3>
-                <p>€{item.price} × {item.quantity}</p>
+          <div className="order-card-items">
+            {order.items.map((item) => (
+              <div className="order-line-item" key={item.id}>
+                <div>
+                  <div className="order-line-item-name">{item.product_name}</div>
+                  <div className="order-line-item-meta">
+                    €{item.price} × {item.quantity}
+                  </div>
+                </div>
+                <div>€{(item.price * item.quantity).toFixed(2)}</div>
               </div>
-              <div className="cart-item-total">
-                €{(item.price * item.quantity).toFixed(2)}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
-          <div
-            style={{
-              textAlign: 'right',
-              marginTop: '10px',
-              paddingTop: '10px',
-              borderTop: '1px solid #eee',
-              fontWeight: 500,
-            }}
-          >
+          <div className="order-card-footer">
             Total: €{order.total.toFixed(2)}
           </div>
         </div>
