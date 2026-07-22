@@ -23,6 +23,7 @@ import Cart from './pages/Cart';
 import { useCart } from './context/CartContext';
 import ChatWidget from './components/ChatWidget';
 import OrderHistory from './pages/OrderHistory';
+import Account from './pages/Account';
 
 function App() {
   // cartCount now comes straight from the real backend cart (via CartContext),
@@ -73,7 +74,7 @@ function App() {
             <Link to="/journal" onClick={() => setMenuOpen(false)}>Journal</Link>
             <Link to="/contact" onClick={() => setMenuOpen(false)}>Contacts</Link>
             <div className="nav-right">
-              <Link to="/login" onClick={() => setMenuOpen(false)}>Account</Link>
+             <Link to="/account" onClick={() => setMenuOpen(false)}>Account</Link>
               <Link to="/orders" onClick={() => setMenuOpen(false)}>My Orders</Link>
               <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
               <Link to="/cart" className="cart-link" onClick={() => setMenuOpen(false)}>
@@ -105,6 +106,7 @@ function App() {
         <Route path="/press" element={<Press />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/orders" element={<OrderHistory />} />
+        <Route path="/account" element={<Account />} />
         <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
         <Route path="/" element={
           <div className="home-container">

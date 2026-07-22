@@ -10,6 +10,7 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
+    balance = Column(Float, default=1000.0)  # mock account balance
 
 
 #for the product page
@@ -74,8 +75,8 @@ class Order(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     total = Column(Float, nullable=False)
-    # Simple status field - no real payment processing here, so every order
-    # starts as "pending". Could later be updated by an admin (e.g. "shipped").
+    # Simple status field - orders are marked "paid" at checkout since the
+    # mock balance is actually deducted at that point.
     status = Column(String, default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

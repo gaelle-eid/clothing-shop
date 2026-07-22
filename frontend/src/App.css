@@ -2065,3 +2065,66 @@ html, body {
     gap: 8px;
   }
 }
+
+/* Product cards inside chat messages */
+.chat-product-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chat-product-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #eee;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.chat-product-card:hover {
+  border-color: #1a1a1a;
+}
+
+.chat-product-card img {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.chat-product-card-name {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.chat-product-card-price {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}
+
+/* Reset default markdown element spacing inside chat bubbles */
+.chat-bubble p {
+  margin: 0;
+}
+
+.chat-bubble p + p {
+  margin-top: 8px;
+}
+
+.chat-bubble ul,
+.chat-bubble ol {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.chat-bubble li {
+  margin-bottom: 2px;
+}
+
+.chat-bubble strong {
+  font-weight: 600;
+}

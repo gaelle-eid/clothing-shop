@@ -7,16 +7,12 @@
 #So this file is the bridge between the outside world and everything we've built so far. Without it, all our previous files are just... definitions sitting there, unreachable.
 
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
-from ..auth import hash_password
-
-
-from fastapi import HTTPException, status
-from ..auth import verify_password, create_access_token
+from ..auth import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"]) #Creates a router object. prefix="/auth" means every route we define below automatically gets /auth stuck in front of its URL (so /register becomes /auth/register)
 
@@ -39,8 +35,6 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     return user#Returns the user object. FastAPI automatically converts it into UserOut shape (because of response_model=schemas.UserOut), silently dropping password_hash from the response.
 
 
-
-
 #login
 @router.post("/login")
 def login(user_in: schemas.UserLogin, db: Session = Depends(get_db)):
@@ -52,3 +46,9 @@ def login(user_in: schemas.UserLogin, db: Session = Depends(get_db)):
         )
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+#returns info about whoever is currently logged in, based on their JWT token
+@router.get("/me", response_model=schemas.UserOut)
+def get_me(current_user: models.User = Depends(get_current_user)):
+    return current_user

@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useCart } from '../context/CartContext';
-import '../App.css'; // all chat widget styles live in App.css (.chat-* classes)
+import '../App.css';
+import ReactMarkdown from 'react-markdown'; // all chat widget styles live in App.css (.chat-* classes)
 
 function ChatWidget() {
   const { refreshCartCount } = useCart();
+  const navigate = useNavigate(); // lets us jump to a product page when a chat card is clicked
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -37,7 +40,12 @@ function ChatWidget() {
         history: history,
       });
 
-      setMessages((prev) => [...prev, { role: 'agent', text: res.data.reply }]);
+      // Each agent message now carries its own list of product cards
+      // (whatever search_products / get_product_details looked up this turn)
+      setMessages((prev) => [
+        ...prev,
+        { role: 'agent', text: res.data.reply, cards: res.data.product_cards || [] },
+      ]);
       setHistory(res.data.history);
       refreshCartCount(); // the agent may have just changed the cart - keep the badge in sync
     } catch (err) {
@@ -83,7 +91,34 @@ function ChatWidget() {
               <div key={i} className={`chat-message-row ${msg.role}`}>
                 {/* Small monogram avatar, only on agent messages */}
                 {msg.role === 'agent' && <div className="chat-avatar">A</div>}
-                <span className={`chat-bubble ${msg.role}`}>{msg.text}</span>
+
+                <div style={{ maxWidth: '80%' }}>
+                 <div className={`chat-bubble ${msg.role}`}>
+  <ReactMarkdown>{msg.text}</ReactMarkdown>
+</div>
+
+                  {/* Clickable product cards, if the agent looked any up this turn */}
+                  {msg.cards && msg.cards.length > 0 && (
+                    <div className="chat-product-cards">
+                      {msg.cards.map((card) => (
+                        <div
+                          key={card.id}
+                          className="chat-product-card"
+                          onClick={() => navigate(`/products/${card.id}`)}
+                        >
+                          <img
+                            src={card.image_url || 'https://via.placeholder.com/80'}
+                            alt={card.name}
+                          />
+                          <div className="chat-product-card-info">
+                            <div className="chat-product-card-name">{card.name}</div>
+                            <div className="chat-product-card-price">€{card.price}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
 

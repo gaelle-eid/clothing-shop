@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pydantic_ai import Agent, RunContext
 from sqlalchemy.orm import Session
 
@@ -12,15 +12,18 @@ from .. import models
 class AgentDeps:
     db: Session
     user: models.User
+    product_cards: list = field(default_factory=list)  # products looked up this turn, for the frontend to show as image cards
 
 
 shopping_agent = Agent(
     'gateway/openai:gpt-5.2',
     deps_type=AgentDeps,
-   system_prompt=(
+    system_prompt=(
         "You are the AMBER Assistant for an online clothing store - you help with "
-        "both shopping AND customer support. Be concise and warm, like a helpful "
-        "boutique assistant.\n\n"
+        "both shopping AND customer support. Be VERY concise and warm, like a helpful "
+        "boutique assistant - short replies (1-3 sentences usually), not long "
+        "paragraphs. Let the product cards do the visual work instead of describing "
+        "things in text.\n\n"
         "For shopping: help customers find products, answer questions about items, "
         "and add things to their cart when asked. Always use your tools to look up "
         "real product information - never make up product names, prices, or "
@@ -28,18 +31,29 @@ shopping_agent = Agent(
         "their cart, unless they explicitly asked for it. "
         "CRITICAL: You must NEVER say something was added to the cart unless you "
         "actually called the add_to_cart tool in this exact turn and it returned a "
-        "success message.\n\n"
+        "success message. The same applies to removals - never say something was "
+        "removed unless you actually called remove_from_cart and it succeeded. "
+        "Always confirm with the customer before removing something too, unless "
+        "they were explicit. If they mention a specific quantity to remove, pass "
+        "it to remove_from_cart; if they just say 'remove X', remove all of it.\n\n"
         "For support: answer questions about shipping, returns, and sizing using "
-        "your tools - never guess at policy details. If a question needs a real "
+        "the get_faq_info tool - never guess at policy details. If a question needs a real "
         "person (a specific order issue, a complaint, anything you can't resolve "
         "yourself), ask for the customer's name and email, then use contact_support "
-        "to send it to the team."
-
+        "to send it to the team.\n\n"
         "For styling: if a customer asks what goes well with a product, or wants "
         "outfit/pairing suggestions, use get_styling_candidates to see real "
         "available options, then use your judgment to recommend 1-3 that "
         "genuinely make sense together (consider color, occasion, and style) - "
         "don't just list everything returned."
+        "\n\nImportant: whenever you look up or mention specific products (via "
+        "search_products, get_product_details, view_cart, add_to_cart, or "
+        "get_styling_candidates), a photo of each product is automatically shown "
+        "to the customer alongside your reply - you do not need to describe the "
+        "image, apologize for not having one, or explain how to find it. Just "
+        "reference the product naturally (e.g. 'Here's the coat:') and keep your "
+        "text reply short, since the visual card already shows the name, price, "
+        "and photo."
     ),
 )
 
@@ -72,6 +86,14 @@ def search_products(
     if not products:
         return "No products found matching that search."
 
+    for p in products:
+        ctx.deps.product_cards.append({
+            "id": p.id,
+            "name": p.name,
+            "price": p.price,
+            "image_url": p.image_url,
+        })
+
     return "\n".join(
         f"- {p.name} (id: {p.id}) — €{p.price}"
         + (f" (was €{p.original_price})" if p.original_price else "")
@@ -92,6 +114,13 @@ def get_product_details(ctx: RunContext[AgentDeps], product_id: int) -> str:
     if not product:
         return f"No product found with id {product_id}."
 
+    ctx.deps.product_cards.append({
+        "id": product.id,
+        "name": product.name,
+        "price": product.price,
+        "image_url": product.image_url,
+    })
+
     return (
         f"{product.name} (id: {product.id})\n"
         f"Price: €{product.price}"
@@ -110,10 +139,9 @@ def add_to_cart(ctx: RunContext[AgentDeps], product_id: int, quantity: int = 1) 
         product_id: The ID of the product to add.
         quantity: How many units to add (default 1).
     """
-    print(f"🔧 TOOL CALLED: add_to_cart(product_id={product_id}, quantity={quantity})")  # debug line
+    print(f"🔧 TOOL CALLED: add_to_cart(product_id={product_id}, quantity={quantity})")
 
     product = ctx.deps.db.query(models.Product).filter(models.Product.id == product_id).first()
-    
 
     if not product:
         return f"No product found with id {product_id}, could not add to cart."
@@ -139,40 +167,110 @@ def add_to_cart(ctx: RunContext[AgentDeps], product_id: int, quantity: int = 1) 
 
     ctx.deps.db.commit()
 
+    ctx.deps.product_cards.append({
+        "id": product.id,
+        "name": product.name,
+        "price": product.price,
+        "image_url": product.image_url,
+    })
+
     return f"Added {quantity} x {product.name} to the cart."
 
 
 @shopping_agent.tool
-def get_shipping_info(ctx: RunContext[AgentDeps]) -> str:
-    """Get information about shipping options, costs, and delivery times."""
-    return (
-        "Shipping info: Free standard shipping on orders over €200. "
-        "Orders under €200 have a flat €10 shipping fee. "
-        "Standard delivery takes 3-5 business days within the EU. "
-        "We currently ship within the EU only."
+def remove_from_cart(ctx: RunContext[AgentDeps], product_id: int, quantity: int | None = None) -> str:
+    """Remove a product from the customer's shopping cart. If quantity is not
+    specified, removes the item entirely regardless of how many are in the cart.
+
+    Args:
+        product_id: The ID of the product to remove.
+        quantity: How many units to remove. If omitted, removes all of this item.
+    """
+    print(f"🔧 TOOL CALLED: remove_from_cart(product_id={product_id}, quantity={quantity})")
+
+    cart_item = (
+        ctx.deps.db.query(models.CartItem)
+        .filter(
+            models.CartItem.user_id == ctx.deps.user.id,
+            models.CartItem.product_id == product_id,
+        )
+        .first()
     )
+
+    if not cart_item:
+        return "That product isn't in your cart, nothing to remove."
+
+    product_name = cart_item.product.name
+
+    if quantity is None or quantity >= cart_item.quantity:
+        ctx.deps.db.delete(cart_item)
+        ctx.deps.db.commit()
+        return f"Removed {product_name} from your cart."
+
+    cart_item.quantity -= quantity
+    ctx.deps.db.commit()
+    return f"Removed {quantity} x {product_name} from your cart ({cart_item.quantity} remaining)."
 
 
 @shopping_agent.tool
-def get_return_policy(ctx: RunContext[AgentDeps]) -> str:
-    """Get information about returns and refunds."""
-    return (
-        "Return policy: Items can be returned within 30 days of delivery, "
-        "as long as they're unworn, unwashed, and have original tags attached. "
-        "Refunds are issued to the original payment method within 5-7 business "
-        "days of us receiving the return."
+def view_cart(ctx: RunContext[AgentDeps]) -> str:
+    """See what's currently in the customer's shopping cart."""
+    cart_items = (
+        ctx.deps.db.query(models.CartItem)
+        .filter(models.CartItem.user_id == ctx.deps.user.id)
+        .all()
     )
+
+    if not cart_items:
+        return "The cart is currently empty."
+
+    total = sum(item.product.price * item.quantity for item in cart_items)
+
+    for item in cart_items:
+        ctx.deps.product_cards.append({
+            "id": item.product.id,
+            "name": item.product.name,
+            "price": item.product.price,
+            "image_url": item.product.image_url,
+        })
+
+    lines = [
+        f"- {item.product.name} (id: {item.product.id}) — €{item.product.price} × {item.quantity}"
+        for item in cart_items
+    ]
+    return "\n".join(lines) + f"\n\nCart total: €{total:.2f}"
 
 
 @shopping_agent.tool
-def get_size_guide(ctx: RunContext[AgentDeps]) -> str:
-    """Get general sizing guidance for AMBER clothing."""
-    return (
-        "Size guide: AMBER sizes run true to standard EU sizing (XS-XL). "
-        "If you're between sizes, we generally recommend sizing up for a "
-        "more relaxed fit, or sizing down for a more fitted look. "
-        "Check each product's individual description for fit notes."
-    )
+def get_faq_info(ctx: RunContext[AgentDeps], topic: str) -> str:
+    """Get store policy information on a specific topic.
+
+    Args:
+        topic: One of "shipping", "returns", or "sizing".
+    """
+    faq = {
+        "shipping": (
+            "Shipping info: Free standard shipping on orders over €200. "
+            "Orders under €200 have a flat €10 shipping fee. "
+            "Standard delivery takes 3-5 business days within the EU. "
+            "We currently ship within the EU only."
+        ),
+        "returns": (
+            "Return policy: Items can be returned within 30 days of delivery, "
+            "as long as they're unworn, unwashed, and have original tags attached. "
+            "Refunds are issued to the original payment method within 5-7 business "
+            "days of us receiving the return."
+        ),
+        "sizing": (
+            "Size guide: AMBER sizes run true to standard EU sizing (XS-XL). "
+            "If you're between sizes, we generally recommend sizing up for a "
+            "more relaxed fit, or sizing down for a more fitted look. "
+            "Check each product's individual description for fit notes."
+        ),
+    }
+
+    return faq.get(topic.lower(), "I don't have information on that topic - try asking about shipping, returns, or sizing.")
+    
 
 
 @shopping_agent.tool
@@ -208,8 +306,6 @@ def get_styling_candidates(ctx: RunContext[AgentDeps], product_id: int) -> str:
     if not base_product:
         return f"No product found with id {product_id}."
 
-    # Look for products in a DIFFERENT category, within a reasonable price range
-    # of the original item - a rough proxy for "similar tier/occasion"
     price_min = base_product.price * 0.4
     price_max = base_product.price * 1.6
 
@@ -227,8 +323,16 @@ def get_styling_candidates(ctx: RunContext[AgentDeps], product_id: int) -> str:
     if not candidates:
         return f"No good styling candidates found for {base_product.name}."
 
+    for p in candidates:
+        ctx.deps.product_cards.append({
+            "id": p.id,
+            "name": p.name,
+            "price": p.price,
+            "image_url": p.image_url,
+        })
+
     header = f"Styling this {base_product.category.lower()} ({base_product.name}, €{base_product.price}). Candidates from other categories:\n"
     return header + "\n".join(
-        f"- {p.name} (id: {p.id}) — €{p.price} — {p.category}, {p.color or 'color varies'}"
+        f"- {p.name} (id: {p.id}) — €{p.price} — {p.color or 'color varies'}"
         for p in candidates
     )

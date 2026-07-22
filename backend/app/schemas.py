@@ -12,6 +12,8 @@ class UserOut(BaseModel): # This schema is used for returning user data in respo
     id: int
     name: str
     email: EmailStr
+    balance: float
+
 
     class Config:
         from_attributes = True
@@ -131,6 +133,15 @@ class OrderOut(BaseModel):
     status: str
     created_at: datetime
     items: list[OrderItemOut]  # nested - each order includes its full list of items
+
+    class Config:
+        from_attributes = True
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    balance: float
 
     class Config:
         from_attributes = True
